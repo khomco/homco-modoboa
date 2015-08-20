@@ -35,4 +35,4 @@ sftp-config.json
 vagrant_ansible_inventory
 
 # This Role
-test/roles/homco.modoboa
+test/roles/homco-modoboa

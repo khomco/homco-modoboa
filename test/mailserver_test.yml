@@ -1,0 +1,16 @@
+---
+
+- name: Update Apt Cache
+  hosts: all
+  sudo: yes
+
+  tasks:
+    - name: Updating Apt
+      apt: update_cache=yes
+
+- name: configure mail server
+  hosts: mailservers
+  sudo: yes
+
+  roles:
+    - homco-modoboa

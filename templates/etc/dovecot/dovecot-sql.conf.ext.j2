@@ -1,0 +1,11 @@
+driver = {{dovecot_sql_driver}}
+
+connect = host={{dovecot_sql_host}} dbname={{dovecot_sql_dbname}} user={{dovecot_sql_username}} password={{dovecot_sql_password}}
+
+default_pass_scheme = SHA512
+
+password_query = SELECT email AS user, password FROM core_user WHERE email='%u' and is_active=1
+
+user_query = SELECT '{{dovecot_mailbox_directory}}/%d/%n' AS home, {{dovecot_mailbox_user_id}} as uid, {{dovecot_mailbox_group_id}} as gid, concat('*:bytes=', mb.quota, 'M') AS quota_rule FROM admin_mailbox mb INNER JOIN admin_domain dom ON mb.domain_id=dom.id WHERE mb.address='%n' AND dom.name='%d'
+
+iterate_query = SELECT email AS username FROM core_user WHERE email<>''

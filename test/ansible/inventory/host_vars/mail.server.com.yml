@@ -1,0 +1,12 @@
+
+swapfile_size: 4GB
+
+apt_host_packages: [ 'libcairo2-dev', 'libpango1.0-dev',
+                     'librrd-dev', 'python-rrdtool' ]
+
+tcpwrappers_deny_all: False
+
+modoboa_hostname: 'mailserver1.homconet.com'
+modoboa_plugins: [ 'modoboa-admin', 'modoboa-admin-limits',
+  'modoboa-postfix-autoreply', 'modoboa-admin-relaydomains',
+  'modoboa-sievefilters', 'modoboa-stats', 'modoboa-webmail' ]

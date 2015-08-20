@@ -1,0 +1,5 @@
+bootstrap_admin_name: debops
+apt_base_packages: [ 'ed', 'python', 'python-apt', 'lsb-release', 'make', 'sudo', 'gnupg-curl',
+                     'wget', 'curl', 'rsync', 'netcat-openbsd', 'bridge-utils', 'vlan',
+                     'openssh-server', 'openssh-blacklist', 'openssh-blacklist-extra',
+                     'python-pycurl', 'python-httplib2', 'apt-transport-https', 'acl' ]

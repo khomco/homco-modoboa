@@ -1,0 +1,50 @@
+---
+
+# Modoboa Configuration
+# ---------------------
+modoboa_group_name: 'vmail'
+modoboa_group_id: 5000
+modoboa_user_name: 'vmail'
+modoboa_user_id: 5000
+
+modoboa_install_name: mailadmin
+modoboa_home: /srv/{{modoboa_install_name}}
+modoboa_port: 443
+modoboa_hostname: 'localhost'
+modoboa_plugins: [ 'modoboa-admin', 'modoboa-admin-limits',
+  'modoboa-postfix-autoreply', 'modoboa-admin-relaydomains', 'modoboa-radicale',
+  'modoboa-sievefilters', 'modoboa-stats', 'modoboa-webmail' ]
+
+modoboa_sql_driver: 'mysql'
+modoboa_sql_dbname: 'modoboa'
+
+# Dovecot Custom Configuration (dependency)
+# ---------------------
+dovecot_sql_driver: '{{modoboa_sql_driver}}'
+dovecot_sql_host: 'localhost'
+dovecot_sql_dbname: '{{modoboa_sql_dbname}}'
+dovecot_sql_username: 'dovecot'
+dovecot_sql_password: ''
+dovecot_sql_password_length: '20'
+dovecot_mail_plugins: [ 'quota' ]
+dovecot_dict_service_user: "{{modoboa_user_name}}"
+dovecot_mailbox_namespace:
+  - name: 'inbox'
+    inbox: 'yes'
+    mailboxes:
+      - name: 'Drafts'
+        auto: 'subscribe'
+        special_use: '\Drafts'
+      - name: 'Junk'
+        auto: 'subscribe'
+        special_use: '\Junk'
+      - name: 'Sent'
+        auto: 'subscribe'
+        special_use: '\Sent'
+      - name: 'Trash'
+        auto: 'subscribe'
+        special_use: '\Trash'
+dovecot_mail_user: vmail
+dovecot_mailbox_directory: /var/{{dovecot_mail_user}}
+dovecot_mailbox_user_id: "{{ modoboa_user_id }}"
+dovecot_mailbox_group_id: "{{ modoboa_group_id }}"

@@ -1,0 +1,24 @@
+---
+
+  # CUSTOM DOVECOT CONFIGURATION FOR MODOBOA
+  - name: Assign or Generate Dovecot SQL Password
+    set_fact: dovecot_sql_password='{{ lookup("password", secret + "/credentials/" + ansible_fqdn + "/" + dovecot_sql_driver + "/" + dovecot_sql_dbname + "/" + dovecot_sql_username + " length=" + dovecot_sql_password_length) }}'
+    when: "'sql' in dovecot_user_accounts"
+
+  - name: Generate Dovecot SQL Configuration
+    template:
+      src: "{{ lookup('template_src', 'etc/dovecot/dovecot-sql.conf.ext.j2') }}"
+      dest: '/etc/dovecot/dovecot-sql.conf.ext'
+      mode: '0640'
+      owner: 'root'
+      group: 'dovecot'
+    when: "'sql' in dovecot_user_accounts"
+
+  - name: Generate Dovecot Dictionary SQL Configuration
+    template:
+      src: "{{ lookup('template_src', 'etc/dovecot/dovecot-dict-sql.conf.ext.j2') }}"
+      dest: '/etc/dovecot/dovecot-dict-sql.conf.ext'
+      mode: '0640'
+      owner: 'root'
+      group: 'dovecot'
+    when: "'sql' in dovecot_user_accounts"

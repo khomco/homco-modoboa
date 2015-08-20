@@ -1,0 +1,58 @@
+# {{ ansible_managed }}
+
+{% if 'sql' in dovecot_user_accounts %}
+passdb sql {
+    driver         = sql
+    args           = /etc/dovecot/dovecot-sql.conf.ext
+}
+
+userdb sql {
+    driver         = sql
+    args           = /etc/dovecot/dovecot-sql.conf.ext
+}
+
+{% endif %}
+# Mail Plugins
+mail_plugins = {{ " ".join(dovecot_mail_plugins) }}
+
+plugin {
+{% if 'quota' in dovecot_mail_plugins %}
+  quota = dict:User quota::proxy::quota
+{% endif %}
+}
+
+service dict {
+  unix_listener dict {
+    mode = 0600
+    user = {{dovecot_dict_service_user}}
+    #group =
+  }
+}
+
+dict {
+{% if 'quota' in dovecot_mail_plugins %}
+  quota = {{dovecot_sql_driver}}:/etc/dovecot/dovecot-dict-sql.conf.ext
+{% endif %}
+}
+
+{% for namespace in dovecot_mailbox_namespace %}
+# Mailbox Namespace
+namespace {{namespace.name}} {
+
+{% if namespace.inbox is defined %}
+inbox = {{namespace.inbox}}
+{% endif %}
+
+{% for mailbox in namespace.mailboxes %}
+mailbox {{mailbox.name}} {
+  {% for key, value in mailbox.iteritems() %}
+  {% if key != 'name' %}
+  {{key}} = {{value}}
+  {% endif %}
+  {% endfor %}
+}
+{% endfor %}
+
+}
+
+{% endfor %}

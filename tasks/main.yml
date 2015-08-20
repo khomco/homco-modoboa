@@ -1,0 +1,78 @@
+---
+
+  - name: Modoboa | Install dependencies
+    apt: name={{ item }} state=present update_cache=no
+    with_items:
+      - apache2
+      - libapache2-mod-wsgi
+      - python-pip
+      - python-rrdtool
+      - python-mysqldb
+      - python-dev
+      - libcairo2-dev
+      - librrd-dev
+      - libxml2-dev
+      - libxslt-dev
+      - zlib1g-dev
+      - postfix-mysql
+
+  # - name: download modoboa
+  #   get_url: url=https://pypi.python.org/packages/source/m/modoboa/modoboa-1.3.1.tar.gz dest=/tmp/modoboa-1.3.1.tar.gz
+  #
+  # - name: unarchive modoboa
+  #   unarchive: src=/tmp/modoboa-1.3.1.tar.gz dest=/tmp copy=no
+  #
+  # - name: install modoboa
+  #   shell: python setup.py install
+  #   args:
+  #     chdir: /tmp/modoboa-1.3.1
+
+  - name: Modoboa | Install Modoboa
+    pip: name=modoboa
+
+  - name: Modoboa | Install Modoboa Plugins
+    pip: name={{ item }}
+    with_items: modoboa_plugins
+
+  - name: Modoboa | Create System Email Group
+    group: name={{modoboa_group_name}} state=present gid={{modoboa_group_id}}
+
+  - name: Modoboa | Create System Email User
+    user: name={{modoboa_user_name}} state=present uid={{modoboa_user_id}} group={{modoboa_group_name}} home=/var/{{modoboa_user_name}} shell=/bin/false
+
+  - name: Modoboa | deploy modoboa application
+    shell: "modoboa-admin.py deploy {{modoboa_install_name}} --collectstatic --dburl default:{{modoboa_sql_driver}}://modoboa:{{ lookup('password', secret + '/credentials/' + ansible_fqdn + '/' + modoboa_sql_driver + '/' + modoboa_sql_dbname + '/modoboa') }}@localhost:3306/{{modoboa_sql_dbname}} --extensions {{ ' '.join(modoboa_plugins) }} --domain localhost"
+    args:
+      chdir: /srv
+      creates: "{{modoboa_install_name}}"
+
+  - name: Modoboa | Compile Modoboa wsgi.py file
+    template: src=wsgi.py.j2 dest="{{modoboa_home}}/{{modoboa_install_name}}/wsgi.py"
+
+  - name: Apache | Enable required Apache modules
+    apache2_module: state=present name={{ item }}
+    with_items:
+      - wsgi
+      - ssl
+
+  - name: Apache | Disable the default site
+    action: command a2dissite 000-default
+    ignore_errors: yes
+    tags: apache
+
+  - name: Apache | Compile Apache Modoboa configuration
+    template: src=apache.conf.j2 dest=/etc/apache2/sites-available/modoboa.conf
+    tags: apache
+
+  - name: Apache | Enable our Modoboa site
+    action: command a2ensite modoboa
+    sudo: yes
+    tags: apache
+    notify:
+      - apache restart
+
+  - name: Modoboa | Generate Postfix Map Files
+    shell: "modoboa-admin.py postfix_maps --extensions {{ ' '.join(modoboa_plugins) }} --dburl {{modoboa_sql_driver}}://modoboa:{{ lookup('password', secret + '/credentials/' + ansible_fqdn + '/' + modoboa_sql_driver + '/' + modoboa_sql_dbname + '/modoboa') }}@127.0.0.1:3306/{{modoboa_sql_dbname}} /etc/postfix/maps"
+    args:
+      chdir: /srv
+      creates: /etc/postfix/maps

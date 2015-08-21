@@ -1,4 +1,0 @@
----
-
-  - name: Generate dovecot_custom_localconf
-    set_fact: dovecot_custom_localconf="{{ lookup('template', '../../templates/dovecot_custom_localconf.j2') }}"

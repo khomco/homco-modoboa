@@ -4,7 +4,35 @@ apt_host_packages: [ 'libcairo2-dev', 'libpango1.0-dev',
 
 tcpwrappers_deny_all: False
 
+# Dovecot Configuration
+# ---------------------------------------------------------
+dovecot_protocols: [ 'imap', 'managesieve' ]
+dovecot_auth_mechanisms: [ 'plain', 'login' ]
+dovecot_user_accounts: [ 'sql' ]
+dovecot_mail_location: 'maildir:~/.maildir'
+dovecot_pki: True
+dovecot_ssl_required: True
+dovecot_imap_config_map:
+  protocol:
+    mail_plugins: '$mail_plugins quota sieve'
+dovecot_lda_config_map:
+  protocol:
+    mail_plugins: '$mail_plugins sieve'
+dovecot_lmtp_config_map:
+  service:
+    unix_listener:
+      /var/spool/postfix/private/dovecot-lmtp:
+        user: 'postfix'
+        group: 'postfix'
+        mode: 0600
+    protocol:
+      mail_plugins: '$mail_plugins quota sieve'
+      postmaster_address: 'postmaster@localhost'
+# ---------------------------------------------------------
+
+
+# Modoboa Configuration
+# ---------------------------------------------------------
 modoboa_hostname: 'mail.server.com'
-modoboa_plugins: [ 'modoboa-admin', 'modoboa-admin-limits',
-  'modoboa-postfix-autoreply', 'modoboa-admin-relaydomains',
-  'modoboa-sievefilters', 'modoboa-stats', 'modoboa-webmail' ]
+modoboa_dovecot_user_accounts: [ 'sql' ]
+# ---------------------------------------------------------

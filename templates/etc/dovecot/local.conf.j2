@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 
-{% if 'sql' in dovecot_user_accounts %}
+{% if 'sql' in modoboa_dovecot_user_accounts %}
 passdb sql {
     driver         = sql
     args           = /etc/dovecot/dovecot-sql.conf.ext
@@ -13,10 +13,10 @@ userdb sql {
 
 {% endif %}
 # Mail Plugins
-mail_plugins = {{ " ".join(dovecot_mail_plugins) }}
+mail_plugins = {{ " ".join(modoboa_dovecot_mail_plugins) }}
 
 plugin {
-{% if 'quota' in dovecot_mail_plugins %}
+{% if 'quota' in modoboa_dovecot_mail_plugins %}
   quota = dict:User quota::proxy::quota
 {% endif %}
 }
@@ -24,18 +24,18 @@ plugin {
 service dict {
   unix_listener dict {
     mode = 0600
-    user = {{dovecot_dict_service_user}}
+    user = {{modoboa_dovecot_dict_service_user}}
     #group =
   }
 }
 
 dict {
-{% if 'quota' in dovecot_mail_plugins %}
-  quota = {{dovecot_sql_driver}}:/etc/dovecot/dovecot-dict-sql.conf.ext
+{% if 'quota' in modoboa_dovecot_mail_plugins %}
+  quota = {{modoboa_sql_driver}}:/etc/dovecot/dovecot-dict-sql.conf.ext
 {% endif %}
 }
 
-{% for namespace in dovecot_mailbox_namespace %}
+{% for namespace in modoboa_dovecot_mailbox_namespace %}
 # Mailbox Namespace
 namespace {{namespace.name}} {
 

@@ -1,16 +1,30 @@
 ---
 
-- name: Update Apt Cache
-  hosts: all
-  sudo: yes
-
-  tasks:
-    - name: Updating Apt
-      apt: update_cache=yes
-
-- name: configure mail server
-  hosts: mailservers
-  sudo: yes
+- name: Common configuration for all hosts
+  hosts: 'all:!localhost:!debops_no_common'
+  gather_facts: True
+  sudo: True
 
   roles:
-    - homco-modoboa
+    - role: debops.pki
+      tags: [ 'pki', 'role::pki' ]
+
+    - role: debops.apt
+      tags: [ 'apt', 'role::apt' ]
+
+    - role: debops.postfix
+      tags: [ 'postfix', 'role::postfix' ]
+
+- name: Manage Dovecot service
+  hosts: 'debops_dovecot'
+  sudo: True
+
+  roles:
+    - { role: debops.dovecot, tags: dovecot }
+
+- name: Configure modoboa
+  hosts: 'modoboa'
+  sudo: True
+
+  roles:
+    - { role: homco-modoboa, tags: modoboa }

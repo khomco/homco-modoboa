@@ -2,7 +2,6 @@
 
 dependencies:
   - role: debops.secret
-  - role: debops.pki
   - role: debops.mysql
 
     mysql_databases:
@@ -20,32 +19,6 @@ dependencies:
         host: 'localhost'
         state: present
         priv: '{{modoboa_sql_dbname}}.*:ALL'
-
-  - role: debops.dovecot
-
-    # dovecot_protocols: [ 'imap', 'imaps', 'pop3', 'pop3s', 'managesieve', 'lmtp' ]
-    dovecot_protocols: [ 'imap', 'managesieve' ]
-    dovecot_auth_mechanisms: [ 'plain', 'login' ]
-    dovecot_user_accounts: [ 'sql' ]
-    dovecot_mail_location: 'maildir:~/.maildir'
-    dovecot_pki: True
-    dovecot_ssl_required: True
-    dovecot_imap_config_map:
-      protocol:
-        mail_plugins: '$mail_plugins quota sieve'
-    dovecot_lda_config_map:
-      protocol:
-        mail_plugins: '$mail_plugins sieve'
-    dovecot_lmtp_config_map:
-      service:
-        unix_listener:
-          /var/spool/postfix/private/dovecot-lmtp:
-            user: 'postfix'
-            group: 'postfix'
-            mode: 0600
-        protocol:
-          mail_plugins: '$mail_plugins quota sieve'
-          postmaster_address: 'postmaster@localhost'
 
   - role: debops.postfix
     postfix: [ 'local', 'network', 'mx' ]

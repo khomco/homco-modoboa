@@ -28,17 +28,17 @@
   #     chdir: /tmp/modoboa-1.3.1
 
   - name: Modoboa | Install Modoboa
-    pip: name=modoboa
+    pip: name=modoboa version={{modoboa_version}} state=present
 
   - name: Modoboa | Install Modoboa Plugins
-    pip: name={{ item }}
+    pip: name={{ item }} state=present
     with_items: modoboa_plugins
 
   - name: Modoboa | Create System Email Group
-    group: name={{modoboa_group_name}} state=present gid={{modoboa_group_id}}
+    group: name={{modoboa_system_group_name}} state=present gid={{modoboa_system_group_id}}
 
   - name: Modoboa | Create System Email User
-    user: name={{modoboa_user_name}} state=present uid={{modoboa_user_id}} group={{modoboa_group_name}} home=/var/{{modoboa_user_name}} shell=/bin/false
+    user: name={{modoboa_system_user_name}} state=present uid={{modoboa_system_user_id}} group={{modoboa_system_group_name}} home={{modoboa_system_mailbox_directory}} shell=/bin/false
 
   - name: Modoboa | deploy modoboa application
     shell: "modoboa-admin.py deploy {{modoboa_install_name}} --collectstatic --dburl default:{{modoboa_sql_driver}}://modoboa:{{ lookup('password', secret + '/credentials/' + ansible_fqdn + '/' + modoboa_sql_driver + '/' + modoboa_sql_dbname + '/modoboa') }}@localhost:3306/{{modoboa_sql_dbname}} --extensions {{ ' '.join(modoboa_plugins) }} --domain localhost"
@@ -72,7 +72,42 @@
       - apache restart
 
   - name: Modoboa | Generate Postfix Map Files
-    shell: "modoboa-admin.py postfix_maps --extensions {{ ' '.join(modoboa_plugins) }} --dburl {{modoboa_sql_driver}}://modoboa:{{ lookup('password', secret + '/credentials/' + ansible_fqdn + '/' + modoboa_sql_driver + '/' + modoboa_sql_dbname + '/modoboa') }}@127.0.0.1:3306/{{modoboa_sql_dbname}} /etc/postfix/maps"
+    shell: "modoboa-admin.py postfix_maps --extensions {{ ' '.join(modoboa_plugins) }} --dburl {{modoboa_sql_driver}}://{{modoboa_sql_username}}:{{ lookup('password', secret + '/credentials/' + ansible_fqdn + '/' + modoboa_sql_driver + '/' + modoboa_sql_dbname + '/modoboa') }}@127.0.0.1:3306/{{modoboa_sql_dbname}} /etc/postfix/maps"
     args:
       chdir: /srv
       creates: /etc/postfix/maps
+
+  # CUSTOM DOVECOT CONFIGURATION FOR MODOBOA
+  - name: Assign or Generate Dovecot SQL Password
+    set_fact: modoboa_dovecot_sql_password='{{ lookup("password", secret + "/credentials/" + ansible_fqdn + "/" + modoboa_sql_driver + "/" + modoboa_sql_dbname + "/" + modoboa_dovecot_sql_username + " length=" + modoboa_sql_password_length) }}'
+    when: "'sql' in modoboa_dovecot_user_accounts"
+
+  - name: Generate Dovecot SQL Configuration
+    template:
+      src: "{{ lookup('template_src', 'etc/dovecot/dovecot-sql.conf.ext.j2') }}"
+      dest: '/etc/dovecot/dovecot-sql.conf.ext'
+      mode: '0640'
+      owner: 'root'
+      group: 'dovecot'
+      force: yes
+    when: "'sql' in modoboa_dovecot_user_accounts"
+
+  - name: Generate Dovecot Dictionary SQL Configuration
+    template:
+      src: "{{ lookup('template_src', 'etc/dovecot/dovecot-dict-sql.conf.ext.j2') }}"
+      dest: '/etc/dovecot/dovecot-dict-sql.conf.ext'
+      mode: '0640'
+      owner: 'root'
+      group: 'dovecot'
+      force: yes
+    when: "'sql' in modoboa_dovecot_user_accounts"
+
+  - name: Generate dovecot local.conf
+    template:
+      src: "{{ lookup('template_src', 'etc/dovecot/local.conf.j2') }}"
+      dest: '/etc/dovecot/local.conf'
+      owner: 'root'
+      group: 'root'
+      mode: '0644'
+      force: yes
+    notify: [ 'dovecot restart' ]

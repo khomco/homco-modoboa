@@ -2,10 +2,12 @@
 
 # Modoboa Configuration
 # ---------------------
-modoboa_group_name: 'vmail'
-modoboa_group_id: 5000
-modoboa_user_name: 'vmail'
-modoboa_user_id: 5000
+modoboa_version: '1.3.3'
+modoboa_system_group_name: 'vmail'
+modoboa_system_group_id: 5000
+modoboa_system_user_name: 'vmail'
+modoboa_system_user_id: 5000
+modoboa_system_mailbox_directory: /var/{{ modoboa_system_user_name }}
 
 modoboa_install_name: mailadmin
 modoboa_home: /srv/{{modoboa_install_name}}
@@ -13,22 +15,20 @@ modoboa_port: 443
 modoboa_hostname: 'localhost'
 modoboa_plugins: [ 'modoboa-admin', 'modoboa-admin-limits',
   'modoboa-postfix-autoreply', 'modoboa-admin-relaydomains', 'modoboa-radicale',
-  'modoboa-sievefilters', 'modoboa-stats', 'modoboa-webmail' ]
+  'modoboa-webmail', 'modoboa-sievefilters', 'modoboa-stats' ]
 
+modoboa_sql_host: 'localhost'
 modoboa_sql_driver: 'mysql'
+modoboa_sql_username: 'modoboa'
 modoboa_sql_dbname: 'modoboa'
+modoboa_sql_password_length: '20'
 
-# Dovecot Custom Configuration (dependency)
-# ---------------------
-dovecot_sql_driver: '{{modoboa_sql_driver}}'
-dovecot_sql_host: 'localhost'
-dovecot_sql_dbname: '{{modoboa_sql_dbname}}'
-dovecot_sql_username: 'dovecot'
-dovecot_sql_password: ''
-dovecot_sql_password_length: '20'
-dovecot_mail_plugins: [ 'quota' ]
-dovecot_dict_service_user: "{{modoboa_user_name}}"
-dovecot_mailbox_namespace:
+# custom variables specific to dovecot
+modoboa_dovecot_user_accounts: [ 'sql' ]
+modoboa_dovecot_sql_username: 'dovecot'
+modoboa_dovecot_mail_plugins: [ 'quota' ]
+modoboa_dovecot_dict_service_user: "{{modoboa_system_user_name}}"
+modoboa_dovecot_mailbox_namespace:
   - name: 'inbox'
     inbox: 'yes'
     mailboxes:
@@ -44,7 +44,3 @@ dovecot_mailbox_namespace:
       - name: 'Trash'
         auto: 'subscribe'
         special_use: '\Trash'
-dovecot_mail_user: vmail
-dovecot_mailbox_directory: /var/{{dovecot_mail_user}}
-dovecot_mailbox_user_id: "{{ modoboa_user_id }}"
-dovecot_mailbox_group_id: "{{ modoboa_group_id }}"

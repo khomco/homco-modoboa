@@ -22,7 +22,9 @@ dependencies:
 
   - role: debops.postfix
     postfix: [ 'local', 'network', 'mx' ]
-    postfix_transport_maps: [ 'lmtp:unix:private/dovecot-lmtp' ]
+    # this seems to error currently with:
+    # warning: lmtp:unix:private/dovecot-lmtp is unavailable. unsupported dictionary type: lmtp
+    # postfix_transport_maps: [ 'lmtp:unix:private/dovecot-lmtp' ]
     postfix_virtual_alias_maps: [ '{{modoboa_sql_driver}}:/etc/postfix/maps/sql-aliases.cf',
       '{{modoboa_sql_driver}}:/etc/postfix/maps/sql-domain-aliases-mailboxes.cf',
       '{{modoboa_sql_driver}}:/etc/postfix/maps/sql-mailboxes-self-aliases.cf',
@@ -44,7 +46,9 @@ dependencies:
     #    virtual_alias_domains: [ '{{modoboa_sql_driver}}:/etc/postfix/maps/sql-domain-aliases.cf' ]
     #    virtual_mailbox_domain: [ '{{modoboa_sql_driver}}:/etc/postfix/maps/sql-domains.cf' ]
     postfix_local_maincf:
-      "virtual_transport = lmtp:unix:private/dovecot-lmtp\n
+      "relay_domains =\n
+
+      virtual_transport = lmtp:unix:private/dovecot-lmtp\n
 
       virtual_mailbox_domains = {{modoboa_sql_driver}}:/etc/postfix/maps/sql-domains.cf\n
 

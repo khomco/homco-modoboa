@@ -1,0 +1,9 @@
+virtual_mailbox_domains = {{modoboa_sql_driver}}:/etc/postfix/maps/sql-domains.cf\\n
+
+virtual_alias_domains = {{modoboa_sql_driver}}:/etc/postfix/maps/sql-domain-aliases.cf\\n
+
+smtpd_sender_login_maps =
+  {{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-mailboxes.cf\\n
+  {{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-aliases.cf\\n
+  {{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-domain-aliases.cf\\n
+  {{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-catchall-aliases.cf

@@ -12,26 +12,26 @@ userdb sql {
 }
 
 {% endif %}
-# Mail Plugins
-mail_plugins = {{ " ".join(modoboa_dovecot_mail_plugins) }}
-
 plugin {
 {% if 'quota' in modoboa_dovecot_mail_plugins %}
-  quota = dict:User quota::proxy::quota
+    quota = dict:User quota::proxy::quota
 {% endif %}
+    sieve = {{modoboa_system_mailbox_directory}}/%d/%n/.dovecot.sieve
+    sieve_dir = {{modoboa_system_mailbox_directory}}/%d/%n/sieve
+    sieve_before = {{modoboa_system_mailbox_directory}}/sieve/before.d/
 }
 
 service dict {
-  unix_listener dict {
-    mode = 0600
-    user = {{modoboa_dovecot_dict_service_user}}
-    #group =
-  }
+    unix_listener dict {
+        mode = 0600
+        user = {{modoboa_dovecot_dict_service_user}}
+        #group =
+    }
 }
 
 dict {
 {% if 'quota' in modoboa_dovecot_mail_plugins %}
-  quota = {{modoboa_sql_driver}}:/etc/dovecot/dovecot-dict-sql.conf.ext
+    quota = {{modoboa_sql_driver}}:/etc/dovecot/dovecot-dict-sql.conf.ext
 {% endif %}
 }
 
@@ -40,19 +40,30 @@ dict {
 namespace {{namespace.name}} {
 
 {% if namespace.inbox is defined %}
-inbox = {{namespace.inbox}}
+    inbox = {{namespace.inbox}}
 {% endif %}
 
 {% for mailbox in namespace.mailboxes %}
-mailbox {{mailbox.name}} {
-  {% for key, value in mailbox.iteritems() %}
-  {% if key != 'name' %}
-  {{key}} = {{value}}
-  {% endif %}
-  {% endfor %}
-}
+    mailbox {{mailbox.name}} {
+{% for key, value in mailbox.iteritems() %}
+{% if key != 'name' %}
+        {{key}} = {{value}}
+{% endif %}
 {% endfor %}
-
-}
+    }
 
 {% endfor %}
+}
+
+{% endfor %}
+log_path = /var/log/dovecot.log
+# If you want everything in one file, just don't specify info_log_path and debug_log_path
+info_log_path = /var/log/dovecot-info.log
+# Leave empty in order to send debug-level messages to info_log_path
+debug_log_path = /var/log/dovecot-debug.log
+auth_verbose=yes
+# auth_debug=yes
+auth_debug_passwords=yes
+mail_debug=yes
+verbose_ssl=yes
+auth_verbose_passwords=plain

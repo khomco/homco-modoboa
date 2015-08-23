@@ -14,7 +14,7 @@ modoboa_home: /srv/{{modoboa_install_name}}
 modoboa_port: 443
 modoboa_hostname: 'localhost'
 modoboa_plugins: [ 'modoboa-admin', 'modoboa-admin-limits',
-  'modoboa-postfix-autoreply', 'modoboa-admin-relaydomains', 'modoboa-radicale',
+  'modoboa-postfix-autoreply', 'modoboa-admin-relaydomains',
   'modoboa-webmail', 'modoboa-sievefilters', 'modoboa-stats' ]
 
 modoboa_sql_host: 'localhost'
@@ -44,3 +44,9 @@ modoboa_dovecot_mailbox_namespace:
       - name: 'Trash'
         auto: 'subscribe'
         special_use: '\Trash'
+      - name: 'Spam'
+        auto: no
+        speciaul_use: '\Junk'
+
+# custom variables specific to postfix
+modoboa_postfix_local_maincf: "{{ lookup('template', lookup('template_src', 'etc/postfix/main.cf/local_maincf.j2')) }}"

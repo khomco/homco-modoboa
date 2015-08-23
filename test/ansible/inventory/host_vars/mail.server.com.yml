@@ -13,7 +13,7 @@ dovecot_pki: True
 dovecot_ssl_required: True
 dovecot_imap_config_map:
   protocol:
-    mail_plugins: '$mail_plugins imap_quota antispam'
+    mail_plugins: '$mail_plugins imap_quota'
 dovecot_lda_config_map:
   protocol:
     mail_plugins: '$mail_plugins sieve'

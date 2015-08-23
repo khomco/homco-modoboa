@@ -45,8 +45,8 @@ modoboa_dovecot_mailbox_namespace:
         auto: 'subscribe'
         special_use: '\Trash'
       - name: 'Spam'
-        auto: no
-        speciaul_use: '\Junk'
+        auto: 'no'
+        special_use: '\Junk'
 
 # custom variables specific to postfix
 modoboa_postfix_local_maincf: "{{ lookup('template', lookup('template_src', 'etc/postfix/main.cf/local_maincf.j2')) }}"

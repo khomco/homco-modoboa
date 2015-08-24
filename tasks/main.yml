@@ -51,7 +51,7 @@
     user: name={{modoboa_system_user_name}} state=present uid={{modoboa_system_user_id}} group={{modoboa_system_group_name}} home={{modoboa_system_mailbox_directory}} shell=/bin/false
 
   - name: deploy modoboa application
-    shell: "modoboa-admin.py deploy {{modoboa_install_name}} --collectstatic --dburl default:{{modoboa_sql_driver}}://modoboa:{{ lookup('password', secret + '/credentials/' + ansible_fqdn + '/' + modoboa_sql_driver + '/' + modoboa_sql_dbname + '/modoboa') }}@localhost:3306/{{modoboa_sql_dbname}} --extensions {{ ' '.join(modoboa_plugins) }} --domain localhost"
+    shell: "modoboa-admin.py deploy {{modoboa_install_name}} --collectstatic --dburl default:{{modoboa_sql_driver}}://{{modoboa_sql_username}}:{{ lookup('password', secret + '/credentials/' + ansible_fqdn + '/' + modoboa_sql_driver + '/' + modoboa_sql_dbname + '/modoboa') }}@localhost:3306/{{modoboa_sql_dbname}} --extensions {{ ' '.join(modoboa_plugins) }} --domain localhost"
     args:
       chdir: /srv
       creates: "{{modoboa_install_name}}"

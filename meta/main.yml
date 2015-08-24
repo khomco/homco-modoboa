@@ -21,7 +21,7 @@ dependencies:
         priv: '{{modoboa_sql_dbname}}.*:ALL'
 
   - role: debops.postfix
-    postfix: [ 'local', 'network', 'mx' ]
+    postfix: [ 'mx', 'network', 'local', 'postscreen', 'dnsbl' ]
     # this seems to error currently with:
     # warning: lmtp:unix:private/dovecot-lmtp is unavailable. unsupported dictionary type: lmtp
     # postfix_transport_maps: [ 'lmtp:unix:private/dovecot-lmtp' ]
@@ -45,17 +45,31 @@ dependencies:
         # not available variable to assign for this
     #    virtual_alias_domains: [ '{{modoboa_sql_driver}}:/etc/postfix/maps/sql-domain-aliases.cf' ]
     #    virtual_mailbox_domain: [ '{{modoboa_sql_driver}}:/etc/postfix/maps/sql-domains.cf' ]
-    postfix_local_maincf:
-      "relay_domains =\n
+    postfix_dependent_maincf:
+      - param: 'virtual_transport'
+        value: 'lmtp:unix:private/dovecot-lmtp'
+      - param: 'virtual_mailbox_domains'
+        value: '{{modoboa_sql_driver}}:/etc/postfix/maps/sql-domains.cf'
+      - param: 'virtual_alias_domains'
+        value: '{{modoboa_sql_driver}}:/etc/postfix/maps/sql-domain-aliases.cf'
+      - param: 'smtpd_sender_login_maps'
+        value: '{{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-mailboxes.cf
+                {{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-aliases.cf
+                {{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-domain-aliases.cf
+                {{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-catchall-aliases.cf'
 
-      virtual_transport = lmtp:unix:private/dovecot-lmtp\n
 
-      virtual_mailbox_domains = {{modoboa_sql_driver}}:/etc/postfix/maps/sql-domains.cf\n
-
-      virtual_alias_domains = {{modoboa_sql_driver}}:/etc/postfix/maps/sql-domain-aliases.cf\n
-
-      smtpd_sender_login_maps =\n
-        \t{{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-mailboxes.cf\n
-        \t{{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-aliases.cf\n
-        \t{{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-domain-aliases.cf\n
-        \t{{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-catchall-aliases.cf"
+    # postfix_local_maincf:
+      # "relay_domains =\n
+#
+      # virtual_transport = lmtp:unix:private/dovecot-lmtp\n
+#
+      # virtual_mailbox_domains = {{modoboa_sql_driver}}:/etc/postfix/maps/sql-domains.cf\n
+#
+      # virtual_alias_domains = {{modoboa_sql_driver}}:/etc/postfix/maps/sql-domain-aliases.cf\n
+#
+      # smtpd_sender_login_maps =\n
+        # \t{{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-mailboxes.cf\n
+        # \t{{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-aliases.cf\n
+        # \t{{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-domain-aliases.cf\n
+        # \t{{modoboa_sql_driver}}:/etc/postfix/maps/sql-sender-login-catchall-aliases.cf"

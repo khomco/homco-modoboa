@@ -4,7 +4,7 @@ driver = {{modoboa_sql_driver}}
 
 connect = host={{modoboa_sql_host}} dbname={{modoboa_sql_dbname}} user={{modoboa_dovecot_sql_username}} password={{modoboa_dovecot_sql_password}}
 
-default_pass_scheme = SHA512
+default_pass_scheme = SHA512-CRYPT
 
 password_query = SELECT email AS user, password FROM core_user WHERE email='%u' and is_active=1
 

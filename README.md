@@ -10,6 +10,3 @@ Testing will require a Vagrant Provisioner called [Vai](https://github.com/Matth
 Be sure to execute the ```test_setup.sh``` file to create the necessary symlink(s) for testing to work. Then execute the ```execute_test.sh``` file.
 
 A full execution can be accomplished with ```vagrant destroy -f; vagrant up; ./execute_test.sh```
-
-## todo
-Currently, this role requires an included modified version of the [debops.postfix](https://github.com/debops/ansible-postfix) Ansible Role which will be removed and the modification will be re-worked to leverage the latest version developed by [DebOps](http://debops.org).
